@@ -1,5 +1,7 @@
 # CV Api
 Api for cv-in-react project
+You can try it here:
+https://florianegrosset.com/api/cv/read.php
 
 ## Intro
 
