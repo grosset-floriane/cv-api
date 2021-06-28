@@ -14,6 +14,7 @@ class ReadCv extends AccessData
     private $cvGeneralTable = "cv";
     private $cvUserDataTable = "cv_personalinfo";
     private $cvCategoriesTable = "cv_categories";
+    private $cvCategoryPositionsTable = "cv_category_positions";
     private $cvContentTable = "cv_content";
 
     // Conncet to database
@@ -50,11 +51,7 @@ class ReadCv extends AccessData
 
         if( !empty($cvGeneral) ) {
             $cvUserData = $this->getUserData($cvId);
-
-            $cvCategories = $cvGeneral["cvCategories"];
-            $cvContent = $this->getCvContent($cvId, $cvCategories);
-
-            // $cvContent = "test2";
+            $cvContent = $this->getCvContent($cvId);
 
             $cvData = ['cvGeneral' => $cvGeneral, 'cvUserData' => $cvUserData, 'cvContent' => $cvContent];
 
@@ -69,10 +66,6 @@ class ReadCv extends AccessData
             echo "No cv found";
             var_dump($cvGeneral);
         }
-
-        
-
-        
 
     }
 
@@ -126,16 +119,20 @@ class ReadCv extends AccessData
 
     }
 
-    private function getCvContent($cvId, $cvCategories) {
-        $cvCategories = explode(",",$cvCategories);
+    private function getCvContent($cvId) {
+        $cvCategories = $this->getCvCategories($cvId);
 
         $cvContent = [];
-        foreach ($cvCategories as $catId) {
+
+        while($cat = $cvCategories->fetch_assoc()) {
+            $catId = $cat['category_id'];
+            $categoryColumn = $cat['category_column'];
+            $categoryOrder = $cat['category_order'];
+
             $categoryTaxonomy = $this->getCategoryTaxonomy($catId);
             $contentOfCategory = $this->getContentOfCategory($cvId, $catId);
-
-            array_push($cvContent, [$categoryTaxonomy, $contentOfCategory]);
-         
+    
+            array_push($cvContent, [$categoryTaxonomy, $categoryColumn, $categoryOrder, $contentOfCategory]);
         }
 
         return $cvContent;
@@ -151,6 +148,19 @@ class ReadCv extends AccessData
             return $resultCategory->fetch_assoc();   
         }
 
+    }
+
+    private function getCvCategories($cvId) {
+        // Order categories by position first column then order (vertical)
+        $queryCategoriesOfCv = "SELECT * FROM  " . $this->cvCategoryPositionsTable . "
+                                    WHERE cv_id = '$cvId'
+                                        ORDER BY category_column DESC, 
+                                                category_order";
+
+        $resultCategoryOfCv = $this->dbConnect->query($queryCategoriesOfCv);
+       
+
+        return $resultCategoryOfCv;
     }
 
 
