@@ -18,14 +18,19 @@ https://webdamn.com/create-simple-rest-api-with-php-mysql/
 ## Table structure
 
 ### cv (general)
-| cv_id | cv_name | cv_categories      |
+| cv_id | cv_name |
 
-| int   | varchar | text (, separated) |
+| int   | varchar |
 
 ### cv_categories
 | category_id | category_name | categories_slug |
 
 | int         | varchar       | varchar         |
+
+### cv_category_positions
+| category_id | cv_id | category_column         | category_order |
+
+| int         | int   | varchar (aside or main) | int            |
 
 ### cv_personalinfo
 | my_name | tagline | address | phone_number | email   | website | cv_id |
